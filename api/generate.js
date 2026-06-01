@@ -3,7 +3,7 @@ export default async function handler(req, res) {
     if (!hwid) return res.status(400).send('Missing hwid');
 
     const key = 'axis_' + Array.from({ length: 20 }, () => Math.floor(Math.random() * 10)).join('');
-    const expiresAt = Date.now() + 86400000; // 24 ساعة
+    const expiresAt = Date.now() + 86400000;
     const value = JSON.stringify({ hwid, expiresAt });
 
     const url = 'https://fluent-stag-141278.upstash.io';
@@ -21,7 +21,7 @@ export default async function handler(req, res) {
         if (response.ok) {
             res.status(200).send(key);
         } else {
-            res.status(500).send('Error storing key');
+            res.status(500).send('Error');
         }
     } catch (e) {
         res.status(500).send('Error');
