@@ -2,31 +2,24 @@ export default async function handler(req, res) {
     const { key, hwid } = req.query;
     if (!key) return res.status(200).send('false');
 
-    const url = 'https://fluent-stag-141278.upstash.io';
-    const token = 'gQAAAAAAAifeAAIgcDE5YmIwNzM0ZDNhZjA0N2RhODllY2UwY2YxNDhhZjZmMg';
-
     try {
-        const resp = await fetch(`${url}/get/${key}`, {
-            headers: { 'Authorization': `Bearer ${token}` }
+        const resp = await fetch('https://fluent-stag-141278.upstash.io/get/' + key, {
+            headers: { 'Authorization': 'Bearer gQAAAAAAAifeAAIgcDE5YmIwNzM0ZDNhZjA0N2RhODllY2UwY2YxNDhhZjZmMg' }
         });
-        if (resp.ok) {
-            const data = await resp.json();
-            if (data.result) {
-                const parsed = JSON.parse(data.result);
-                if (hwid) {
-                    if (parsed.hwid === hwid && Date.now() < parsed.expiresAt) {
-                        return res.status(200).send('true');
-                    }
-                } else {
-                    if (Date.now() < parsed.expiresAt) {
-                        return res.status(200).send('true');
-                    }
-                }
-                if (Date.now() >= parsed.expiresAt) {
-                    await fetch(`${url}/del/${key}`, { headers: { 'Authorization': `Bearer ${token}` } });
-                }
+        const data = await resp.json();
+        
+        if (data.result) {
+            const parsed = JSON.parse(data.result);
+            
+            if (hwid && parsed.hwid !== hwid) {
+                return res.status(200).send('false');
+            }
+            
+            if (Date.now() < parsed.expiresAt) {
+                return res.status(200).send('true');
             }
         }
     } catch (e) {}
+    
     res.status(200).send('false');
 }
